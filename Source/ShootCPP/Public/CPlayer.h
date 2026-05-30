@@ -15,6 +15,7 @@ class SHOOTCPP_API ACPlayer : public APawn
 public:
 	// Sets default values for this pawn's properties
 	ACPlayer();
+
 	// 소멸자 필요 없음(메모리 관리 알아서 해줌)
 	
 protected:
@@ -40,4 +41,13 @@ public:
 	class UBoxComponent* BoxComp;
 	UPROPERTY(VisibleAnywhere, Category="ShootComponent")
 	class UStaticMeshComponent* BodyMeshComp;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
+	class UInputAction* ia_move;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
+	class UInputMappingContext* imc_shoot;
+	
+	void MovePlayer(const struct FInputActionValue& value);
+	FVector dir;
+	
 };
