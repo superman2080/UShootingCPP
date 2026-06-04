@@ -87,6 +87,7 @@ void ACPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 void ACPlayer::MovePlayer(const struct FInputActionValue& value) /*const: 외부에서 로컬변수 값을 바꿀 수 없음*/
 {
 	auto v = value.Get<FVector2D>();
+	v.Normalize();
 	dir.Y = v.X;
 	dir.Z = v.Y;
 	
