@@ -31,4 +31,12 @@ public:
 	class UBoxComponent* BoxComp;
 	UPROPERTY(VisibleAnywhere, Category="ShootComponent")
 	class UStaticMeshComponent* BodyMeshComp;
+	
+	UPROPERTY(EditAnywhere)
+	UMaterialInterface* SurfaceMaterial;
+
+	UFUNCTION()
+	void OnHit(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
+		bool bFromSweep, const FHitResult& SweepResult);
 };

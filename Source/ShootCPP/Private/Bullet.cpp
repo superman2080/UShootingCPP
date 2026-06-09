@@ -2,8 +2,9 @@
 
 
 #include "Bullet.h"
-
+#include "Enemy.h"
 #include "Components/BoxComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 
 // Sets default values
@@ -25,13 +26,20 @@ ABullet::ABullet()
 	{
 		BodyMeshComp->SetStaticMesh(tempMesh.Object);
 	}
+	
+	ConstructorHelpers::FObjectFinder<UMaterial> mat(TEXT("/Engine/MapTemplates/Materials/BasicAsset02.BasicAsset02"));
+	if (mat.Succeeded())
+	{
+		BodyMeshComp->SetMaterial(0, mat.Object);
+	}
 }
 
 // Called when the game starts or when spawned
 void ABullet::BeginPlay()
 {
 	Super::BeginPlay();
-
+	BoxComp->SetCollisionProfileName(TEXT("OverlapAll"));
+	BoxComp->OnComponentBeginOverlap.AddDynamic(this, &ABullet::OnHit);
 }
 
 // Called every frame
@@ -39,7 +47,20 @@ void ABullet::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	auto dir = FVector::UpVector * speed;
-	
 	SetActorLocation(GetActorLocation() + dir * DeltaTime);
+}
+
+void ABullet::OnHit(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
+	bool bFromSweep, const FHitResult& SweepResult)
+{
+	AEnemy* enemy = Cast<AEnemy>(OtherActor);
+	if (!enemy) return;
+
+	if (enemy->destroySound)
+		UGameplayStatics::PlaySound2D(GetWorld(), enemy->destroySound);
+
+	enemy->Destroy();
+	Destroy();
 }
 

@@ -7,6 +7,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "EnhancedInputComponent.h"
 #include "InputActionValue.h"
+#include "Kismet/GameplayStatics.h"
 
 
 // 에디터 실행 시에 호출
@@ -25,7 +26,7 @@ ACPlayer::ACPlayer()
 	BodyMeshComp->SetupAttachment(BoxComp);
 	
 	// BodyMesh에 CubeStaticMesh 데이터 로드해서 할당.
-	ConstructorHelpers::FObjectFinder<UStaticMesh> tempMesh(TEXT("/Script/Engine.StaticMesh'/Engine/BasicShapes/Cube.Cube'"));
+	ConstructorHelpers::FObjectFinder<UStaticMesh> tempMesh(TEXT("/Game/Models/Spaceship_ARA.Spaceship_ARA"));
 	
 	if (tempMesh.Succeeded() /*tempMesh != nullptr*/)
 	{
@@ -81,6 +82,8 @@ void ACPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	{
 		// Triggered: 계속 누르고 있을 때
 		playerInput->BindAction(ia_move, ETriggerEvent::Triggered, this, &ACPlayer::MovePlayer);
+		
+		playerInput->BindAction(ia_fire, ETriggerEvent::Started, this, &ACPlayer::Fire);
 	}
 }
 
@@ -91,5 +94,19 @@ void ACPlayer::MovePlayer(const struct FInputActionValue& value) /*const: 외부
 	dir.Y = v.X;
 	dir.Z = v.Y;
 	
+}
+
+void ACPlayer::Fire(const struct FInputActionValue& value)
+{
+	if (!bulletFactory)
+		return;
+	
+	FVector spawnPos = GetActorLocation();
+	GetWorld()->SpawnActor<ABullet>(bulletFactory, spawnPos, FRotator::ZeroRotator);
+	
+	if (!fireSound)
+		return;
+	
+	UGameplayStatics::PlaySound2D(GetWorld(), fireSound);
 }
 

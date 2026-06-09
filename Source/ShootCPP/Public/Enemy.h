@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "CPlayer.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Enemy.generated.h"
@@ -23,7 +24,6 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	
-public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Stat")
 	float speed = 500;
 	
@@ -31,6 +31,8 @@ public:
 	class UBoxComponent* BoxComp;
 	UPROPERTY(VisibleAnywhere, Category="ShootComponent")
 	class UStaticMeshComponent* BodyMeshComp;
+	UPROPERTY(EditAnywhere)
+	UMaterialInterface* SurfaceMaterial;
 	
 	UFUNCTION()
 	void OnHit(UPrimitiveComponent* OverlappedComponent,
@@ -38,4 +40,10 @@ public:
 		UPrimitiveComponent* OtherComp,
 		int32 OtherBodyIndex, bool bFromSweep, 
 		const FHitResult & SweepResult);
+	
+	UPROPERTY(EditAnywhere)
+	ACPlayer* player;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Sound")
+	USoundBase* destroySound;
 };

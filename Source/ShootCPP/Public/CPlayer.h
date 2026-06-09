@@ -3,8 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Bullet.h"
 #include "GameFramework/Pawn.h"
-#include "Components/BoxComponent.h"
 #include "CPlayer.generated.h"
 
 UCLASS()
@@ -46,8 +46,17 @@ public:
 	class UInputAction* ia_move;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
 	class UInputMappingContext* imc_shoot;
-	
 	void MovePlayer(const struct FInputActionValue& value);
 	FVector dir;
 	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
+	class UInputAction* ia_fire;
+	void Fire(const struct FInputActionValue& value);
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Input")
+	TSubclassOf<ABullet> bulletFactory;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Sound")
+	USoundBase* fireSound;
 };
