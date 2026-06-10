@@ -1,50 +1,62 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "EnemySpawner.h"
 #include "UE5Coro.h"
 using namespace UE5Coro;
 using namespace UE5Coro::Latent;
 
-
-// Sets default values
 AEnemySpawner::AEnemySpawner()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
 }
 
-// Called when the game starts or when spawned
 void AEnemySpawner::BeginPlay()
 {
 	Super::BeginPlay();
 	player = Cast<ACPlayer>(UGameplayStatics::GetActorOfClass(GetWorld(), ACPlayer::StaticClass()));
-	SpawnEnemyLoop();
+	SpawnLoop();
 }
 
-// Called every frame
 void AEnemySpawner::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 }
 
-TCoroutine<> AEnemySpawner::SpawnEnemyLoop()
+TCoroutine<> AEnemySpawner::SpawnLoop()
 {
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
 	while (true)
 	{
-		co_await Seconds(enemyGenInterval);
+		// ── 적 스폰 페이즈 ──────────────────────────────
+		float Elapsed = 0.f;
+		while (Elapsed < enemySpawnDuration)
+		{
+			co_await Seconds(enemyGenInterval);
+			Elapsed += enemyGenInterval;
 
-		if (!IsValid(this)) break;
-		if (!IsValid(player)) break;
-		if (!enemyFactory) break;
-		UWorld* world = GetWorld();
-		if (!world) break;
+			if (!IsValid(this) || !IsValid(player) || !enemyFactory) co_return;
 
-		FVector spawnPos = FVector(0, FMath::FRandRange(-540.0f, 540.0f), 960);
-		FActorSpawnParameters spawnParams;
-		spawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-		world->SpawnActor<AEnemy>(enemyFactory, spawnPos, FRotator::ZeroRotator, spawnParams);
+			FVector SpawnPos = FVector(0.f, FMath::FRandRange(-540.f, 540.f), 960.f);
+			GetWorld()->SpawnActor<AEnemy>(enemyFactory, SpawnPos, FRotator::ZeroRotator, SpawnParams);
+		}
+
+		// ── 보스 스폰 페이즈 ────────────────────────────
+		if (!IsValid(this) || !bossFactory) co_return;
+
+		ABoss* Boss = GetWorld()->SpawnActor<ABoss>(
+			bossFactory, bossSpawnPos, FRotator::ZeroRotator, SpawnParams);
+
+		if (IsValid(Boss))
+			Boss->TargetPosition = bossTargetPos;
+
+		// 보스가 살아있는 동안 대기 (0.5초 간격으로 체크)
+		while (IsValid(Boss))
+		{
+			co_await Seconds(0.5f);
+			if (!IsValid(this)) co_return;
+		}
+
+		// 보스 사망 후 잠시 대기 후 적 루틴 재시작
+		co_await Seconds(3.f);
 	}
 }
-

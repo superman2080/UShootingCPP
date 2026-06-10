@@ -4,11 +4,12 @@
 
 #include "CPlayer.h"
 #include "CoreMinimal.h"
+#include "IHPUser.h"
 #include "GameFramework/Actor.h"
 #include "Enemy.generated.h"
 
 UCLASS()
-class SHOOTCPP_API AEnemy : public AActor
+class SHOOTCPP_API AEnemy : public AActor, public IHPUser
 {
 	GENERATED_BODY()
 
@@ -24,6 +25,8 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Stat")
+	float hp = 1.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Stat")
 	float speed = 500;
 	
@@ -46,4 +49,7 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Sound")
 	USoundBase* destroySound;
+
+	virtual float GetHP() const override { return hp; }
+	virtual void TakeDamage(float damage) override;
 };

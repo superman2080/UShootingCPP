@@ -55,11 +55,21 @@ void AEnemy::Tick(float DeltaTime)
 void AEnemy::OnHit(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp,
 	int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	if (!Cast<ACPlayer>(OtherActor)) return;
+	ACPlayer* Player = Cast<ACPlayer>(OtherActor);
+	if (!Player) return;
 
-	if (destroySound)
-		UGameplayStatics::PlaySound2D(GetWorld(), destroySound);
-	OtherActor->Destroy();
+	Player->TakeDamage(100.f);
 	Destroy();
+}
+
+void AEnemy::TakeDamage(float damage)
+{
+	hp -= damage;
+	if (hp <= 0.f)
+	{
+		if (destroySound)
+			UGameplayStatics::PlaySound2D(GetWorld(), destroySound);
+		Destroy();
+	}
 }
 

@@ -4,11 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "Bullet.h"
+#include "IHPUser.h"
 #include "GameFramework/Pawn.h"
 #include "CPlayer.generated.h"
 
 UCLASS()
-class SHOOTCPP_API ACPlayer : public APawn
+class SHOOTCPP_API ACPlayer : public APawn, public IHPUser
 {
 	GENERATED_BODY()
 
@@ -33,6 +34,8 @@ public:
 public:
 	// 인스펙터에서 보이게 하기 위한 UPROPERTY(UObject를 상속받아야함)
 	// Category: [Header()] 어트리뷰트 느낌. "는 옵션
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Stat")
+	float hp = 100.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Stat")
 	float speed = 500;
 	
@@ -59,4 +62,7 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="Sound")
 	USoundBase* fireSound;
+
+	virtual float GetHP() const override { return hp; }
+	virtual void TakeDamage(float damage) override;
 };

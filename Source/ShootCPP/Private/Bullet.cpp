@@ -2,6 +2,7 @@
 
 
 #include "Bullet.h"
+#include "Boss.h"
 #include "Enemy.h"
 #include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -27,7 +28,7 @@ ABullet::ABullet()
 		BodyMeshComp->SetStaticMesh(tempMesh.Object);
 	}
 	
-	ConstructorHelpers::FObjectFinder<UMaterial> mat(TEXT("/Engine/MapTemplates/Materials/BasicAsset02.BasicAsset02"));
+	ConstructorHelpers::FObjectFinder<UMaterial> mat(TEXT("/Game/Materials/M_Bullet.M_Bullet"));
 	if (mat.Succeeded())
 	{
 		BodyMeshComp->SetMaterial(0, mat.Object);
@@ -54,13 +55,15 @@ void ABullet::OnHit(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
 	bool bFromSweep, const FHitResult& SweepResult)
 {
-	AEnemy* enemy = Cast<AEnemy>(OtherActor);
-	if (!enemy) return;
-
-	if (enemy->destroySound)
-		UGameplayStatics::PlaySound2D(GetWorld(), enemy->destroySound);
-
-	enemy->Destroy();
-	Destroy();
+	if (AEnemy* Enemy = Cast<AEnemy>(OtherActor))
+	{
+		Enemy->TakeDamage(1.f);
+		Destroy();
+	}
+	else if (ABoss* Boss = Cast<ABoss>(OtherActor))
+	{
+		Boss->TakeDamage(1.f);
+		Destroy();
+	}
 }
 

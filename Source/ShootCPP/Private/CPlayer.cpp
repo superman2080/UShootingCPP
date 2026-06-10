@@ -100,13 +100,20 @@ void ACPlayer::Fire(const struct FInputActionValue& value)
 {
 	if (!bulletFactory)
 		return;
-	
+
 	FVector spawnPos = GetActorLocation();
 	GetWorld()->SpawnActor<ABullet>(bulletFactory, spawnPos, FRotator::ZeroRotator);
-	
+
 	if (!fireSound)
 		return;
-	
+
 	UGameplayStatics::PlaySound2D(GetWorld(), fireSound);
+}
+
+void ACPlayer::TakeDamage(float damage)
+{
+	hp -= damage;
+	if (hp <= 0.f)
+		Destroy();
 }
 
